@@ -1,5 +1,5 @@
 name 'A10Networks-vThunder'
-version '1.0.1'
+version '1.0.2'
 description "Module for creating real servers, service group and vip on AX devices.
  		Apply to a node that can reach the A10 through https.
 		For more information run puppet describe on each resource.
