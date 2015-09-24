@@ -1,0 +1,125 @@
+# Custom provider for creating/deleting servicegroups on A10
+# Copyright 2013, A10 Networks provided as is
+#
+# All rights reserved - Do Not Redistribute
+# send bugs to floris@rawpacket.com
+#
+
+
+require 'net/https'
+require 'rexml/document'
+
+
+Puppet::Type.type(:axsvcgroup).provide(:axsvc) do
+
+        def exists?
+                @session_id = self.connect(@resource[:axdevice], @resource[:username], @resource[:password])
+                ret = get_group(@resource[:axdevice], @resource[:username], @resource[:password], @session_id, @resource[:name])
+                close_session(@resource[:axdevice], @session_id)
+                return ret
+        end
+
+        def create
+                @session_id = self.connect(@resource[:axdevice], @resource[:username], @resource[:password])
+                create_group(@resource[:axdevice], @resource[:username], @resource[:password], @session_id, @resource[:name], @resource[:members], @resource[:httpport], 
+			@resource[:healthmon])
+                close_session(@resource[:axdevice], @session_id)
+                #testfunc( @resource[:ipaddress] )
+        end
+
+        def destroy
+                @session_id = self.connect(@resource[:axdevice], @resource[:username], @resource[:password])
+                delete_group(@resource[:axdevice], @resource[:username], @resource[:password], @session_id, @resource[:name])
+                close_session(@resource[:axdevice], @session_id)
+        end
+
+        def connect(axdevice, username, password)
+                base_uri='/services/rest/V1/?method=authenticate'
+                request = base_uri + '&username=' + username + '&password=' + password
+                resp = run_http(request, axdevice)
+                xmlDoc = REXML::Document.new resp.body
+                xmlDoc.elements.each('response status') {
+                |status|
+                        @session_id = status.elements["session_id"].text
+                }
+                return @session_id
+        end
+
+	def create_group(axdevice, username, password, sessionid, groupname, members, port, healthmon)
+		m = ''
+		o = ''
+		members.each do |key, value|
+        		m = m +  key.to_s + "%02"
+        		o = o + '&' + key.to_s + '=address%03' + value + '%02port%03' + port
+        		#print key.to_s + value
+    		end
+    		memberlist = '&member-list=' + m[0..-4] + o
+    		base_uri=('/services/rest/V1/?session_id=' + sessionid + '&method=slb.service-group.create')
+    		request = base_uri + '&name=' + groupname + '&type=2&lb_method=1&health_monitor=' + healthmon + memberlist
+    		resp = run_http(request, axdevice)
+    		handle_response(resp)
+	end
+
+	def delete_group(axdevice, username, password, sessionid, groupname)
+    		base_uri=('/services/rest/V1/?session_id=' + sessionid + '&method=slb.service-group.delete')
+    		request = base_uri + '&name=' + groupname
+    		resp = run_http(request, axdevice)
+    		handle_response(resp)
+	end
+
+	def close_session(axdevice, sessionid)
+    		base_uri=('/services/rest/V2/?session_id=' + sessionid + '&methodi=system.action.write_memory&media=disk&target=primary&partition=shared')
+    		request = base_uri
+    		Puppet::debug("Saving to startup config...")
+    		resp = run_http(request, axdevice)
+    		base_uri=('/services/rest/V1/?session_id=' + sessionid + '&method=session.close')
+    		request = base_uri
+    		resp = run_http(request, axdevice)
+	end
+
+	def run_http(request, axdevice)
+    		http = Net::HTTP.new( axdevice, 443)
+    		http.use_ssl = true
+    		http.verify_mode = OpenSSL::SSL::VERIFY_NONE #Ease of use, I know, I know. Change here if you *do* want to verify
+    		http.start do |http|
+    			req = Net::HTTP::Get.new(request)
+    			resp = http.request(req)
+    			return resp
+		end
+        end
+
+        def handle_response(resp)
+                xmlDoc = REXML::Document.new resp.body
+                xmlDoc.elements.each("response") {
+                |ser|
+                    res = ser.attributes['status']
+                        if res == 'ok'
+                                Puppet::debug('A10 sais: ' + res  + resp.body)
+                                return true
+                        elsif res == 'fail'
+                xmlDoc.elements.each("response/error") {
+                |ser|
+                        res = ser.attributes['msg']
+                                if /67305473/.match(res)
+                                        Puppet::debug("Ok, groupname does not exist.")
+                                return false
+                                else
+                                        raise 'A10 sais: ' + res +  "\n"
+					Puppet::debug("Dumping: " +  resp.body)
+                                end
+                }
+                else
+                	raise 'Unknown error occurred'
+			Puppet::debug("Dumping: " + resp.body)
+		
+                end
+                }
+        end
+
+        def get_group(axdevice, username, password, sessionid, groupname)
+                base_uri=('/services/rest/V1/?session_id=' + sessionid + '&method=slb.service-group.getByName')
+                request = base_uri + '&name=' + groupname
+                resp = run_http(request, axdevice)
+                handle_response(resp)
+        end
+end

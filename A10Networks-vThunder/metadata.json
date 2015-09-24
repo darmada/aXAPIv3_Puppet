@@ -1,0 +1,185 @@
+{
+  "dependencies": [
+
+  ],
+  "description": "Module for creating real servers, service group and vip on AX devices.\n \t\tApply to a node that can reach the A10 through https.\n\t\tFor more information run puppet describe on each resource.\n\t\tBe aware that the providers attempt to save the configuration (e.g. wr mem) but this\n\t\tmight not work on older versions of the A10 software.\n\t\tThunder ACOS software minimum version: 4.0.0.\n\t\tCompatible aXapi version 3.0\n\t\tCopyright 2015, A10 Networks provided as is\n\t\tTested on Puppet 3.8.2",
+  "summary": "UNKNOWN",
+  "source": "UNKNOWN",
+  "project_page": "UNKNOWN",
+  "checksums": {
+    "lib/puppet/provider/axvip/axvip.rb": "8a3f0f6153f5811b1eac28ae3cfde829",
+    "lib/puppet/type/axvip.rb": "83c87575ade54c8e63b9f286c2dc646a",
+    "lib/puppet/provider/axsvcgroup/axsvc.rb": "9805b057f3ac8166d47c3d3e0ca2d6d9",
+    "lib/puppet/type/axsvcgroup.rb": "2303a053dd238b459dce13c07bbc1b03",
+    "lib/puppet/provider/axserver/axserv.rb": "356830765e5fc9db1ab92147d2cd3eb8",
+    "lib/puppet/type/axserver.rb": "3b7a07f6f8b2988ddba31b85dad852c1",
+    "manifests/example_create_service.pp": "4d640a301bef1269e15fb857d207d860",
+    "manifests/example_delete_service.pp": "c6ba2dc6e34941f6cb298c1f2dff8aa7",
+    "CHANGELOG": "48036f54b30d5e4440fb4f63ea1cf511",
+    "Modulefile": "533de04b618d25fd1fe1ac0a320eb6d2"
+  },
+  "author": "A10Networks",
+  "types": [
+    {
+      "providers": [
+        {
+          "name": "axserv",
+          "doc": ""
+        }
+      ],
+      "name": "axserver",
+      "parameters": [
+        {
+          "name": "name",
+          "doc": "Common name of the real server"
+        },
+        {
+          "name": "axdevice",
+          "doc": "Name or ip address  of the A10 device to configure"
+        },
+        {
+          "name": "username",
+          "doc": "Username for the A10 device"
+        },
+        {
+          "name": "password",
+          "doc": "Password for the A10 device"
+        },
+        {
+          "name": "ipaddress",
+          "doc": "Ip address of the real server"
+        },
+        {
+          "name": "httpport",
+          "doc": "Port of the real server"
+        }
+      ],
+      "doc": "Custom type for handling A10 real servers",
+      "properties": [
+        {
+          "name": "ensure",
+          "doc": "The basic property that the resource should be in.  Valid values are `present`, `absent`."
+        }
+      ]
+    },
+    {
+      "providers": [
+        {
+          "name": "axvip",
+          "doc": ""
+        }
+      ],
+      "name": "axvip",
+      "parameters": [
+        {
+          "name": "name",
+          "doc": "Common name of the vip"
+        },
+        {
+          "name": "axdevice",
+          "doc": "Name or ip address  of the A10 device to configure"
+        },
+        {
+          "name": "username",
+          "doc": "Username for the A10 device"
+        },
+        {
+          "name": "password",
+          "doc": "Password for the A10 device"
+        },
+        {
+          "name": "ipaddress",
+          "doc": "Ip address of the vip"
+        },
+        {
+          "name": "port",
+          "doc": "Port of the vip"
+        },
+        {
+          "name": "type",
+          "doc": "Type of the port http|https"
+        },
+        {
+          "name": "ssltemplate",
+          "doc": "Name of the ssl/tls client template to use (should be created in advance)"
+        },
+        {
+          "name": "natpool",
+          "doc": "Name of the nat pool template to use (if omitted no nat pool is used or created)"
+        },
+        {
+          "name": "startaddress",
+          "doc": "Start address of the pool"
+        },
+        {
+          "name": "endaddress",
+          "doc": "Last address of the pool"
+        },
+        {
+          "name": "netmask",
+          "doc": "Netmask of the pool"
+        },
+        {
+          "name": "group",
+          "doc": "Servicegroup to use"
+        }
+      ],
+      "doc": "Custom type for handling A10 vips",
+      "properties": [
+        {
+          "name": "ensure",
+          "doc": "The basic property that the resource should be in.  Valid values are `present`, `absent`."
+        }
+      ]
+    },
+    {
+      "providers": [
+        {
+          "name": "axsvc",
+          "doc": ""
+        }
+      ],
+      "name": "axsvcgroup",
+      "parameters": [
+        {
+          "name": "name",
+          "doc": "Common name of the servicegroup"
+        },
+        {
+          "name": "axdevice",
+          "doc": "Name or ip address  of the A10 device to configure"
+        },
+        {
+          "name": "username",
+          "doc": "Username for the A10 device"
+        },
+        {
+          "name": "password",
+          "doc": "Password for the A10 device"
+        },
+        {
+          "name": "members",
+          "doc": "Members of the servicegroup (type Hash)"
+        },
+        {
+          "name": "httpport",
+          "doc": "Port of the real servers"
+        },
+        {
+          "name": "healthmon",
+          "doc": "Healthmonitor to use for the servicegroup"
+        }
+      ],
+      "doc": "Custom type for handling A10 servicegroups",
+      "properties": [
+        {
+          "name": "ensure",
+          "doc": "The basic property that the resource should be in.  Valid values are `present`, `absent`."
+        }
+      ]
+    }
+  ],
+  "license": "Apache License, Version 2.0",
+  "name": "A10Networks-vThunder",
+  "version": "1.0.1"
+}

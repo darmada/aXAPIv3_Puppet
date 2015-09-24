@@ -1,0 +1,11 @@
+name 'A10Networks-vThunder'
+version '1.0.1'
+description "Module for creating real servers, service group and vip on AX devices.
+ 		Apply to a node that can reach the A10 through https.
+		For more information run puppet describe on each resource.
+		Be aware that the providers attempt to save the configuration (e.g. wr mem) but this
+		might not work on older versions of the A10 software.
+		vThunder ACOS software minimum version: 4.0.0
+		Compatible aXapi version: 3.0
+		Copyright 2015, A10 Networks provided as is
+		Tested on Puppet 3.8.2"
